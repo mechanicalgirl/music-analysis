@@ -1,5 +1,9 @@
 *.tsv
-*.txt
+census_instructions.txt
+discogs-api-notes.txt
+music_tree.txt
+playlist.txt
+theme-vault.txt
 
 imports.sh
 music_report.sh
