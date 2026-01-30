@@ -1,3 +1,24 @@
+"""
+Identify and optionally change genre tags on music files
+
+Three options:
+
+- Check for songs with missing or invalid genres and have an option to fix them
+
+  Usage:
+      python3 find_genre.py /path/to/music/files
+
+- Find songs tagged with a specific genre
+
+  Usage:
+      python3 find_genre.py /path/to/music/files specific_genre
+
+- List all song genres one at a time
+
+  Usage:
+      python3 find_genre.py /path/to/music/files
+"""
+
 import os
 import sys
 import time
@@ -18,8 +39,7 @@ def add_genre_to_mp3(file_path, genre):
         # Set the genre
         audio.tags.add(TCON(encoding=3, text=genre))
         audio.save()
-        print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
-        print(f'Added genre "{genre}" to {print_path}')
+        print(f'Added genre "{genre}" to {file_path}')
     except ID3NoHeaderError:
         print(f'No ID3 header found in {file_path}.')
     except Exception as e:
@@ -30,11 +50,10 @@ def check_mp3_genre(directory):
         for file in files:
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
-                print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
                 tag = TinyTag.get(file_path)
 
                 print('\n')
-                print(print_path)
+                print(file_path)
                 try:
                     song_string = f"Artist: {tag.artist}\n Title: {tag.title}\n Album: {tag.album}\n Genre: {tag.genre}"
                 except Exception as e:
@@ -42,27 +61,10 @@ def check_mp3_genre(directory):
                     print("No Album", e)
                 print(song_string)
 
-                """
                 if tag.genre in valid_genres:
-                    if tag.genre in ['Rock', 'Pop', 'Easy listening', 'Easy Listening', 'Live', 'Noise', 'Christian']:
-                        proceed = input(f"Is the genre {tag.genre.upper()} ok for {print_path}? (n or enter for y): ")
-                        if proceed == 'n':
-                            genre = input(f"Enter a new genre for {print_path}: ")
-                            print(f"New genre is {genre}")
-                            add_genre_to_mp3(file_path, genre)
-                else:
-                    if tag.genre == 'Hip-Hop':
-                        genre = 'Hip Hop'
-                    else:
-                        genre = input(f"{tag.genre} is not valid, enter a new one: ")
-                    print(f"New genre is {genre}")
-                    add_genre_to_mp3(file_path, genre)
-                """                
-
-                if tag.genre in valid_genres:
-                    proceed = input(f"Is the genre {tag.genre.upper()} ok for {print_path}? (n or enter for y): ")
+                    proceed = input(f"Is the genre {tag.genre.upper()} ok for {file_path}? (n or enter for y): ")
                     if proceed == 'n':
-                        genre = input(f"Enter a new genre for {print_path}: ")
+                        genre = input(f"Enter a new genre for {file_path}: ")
                         print(f"New genre is {genre}")
                         add_genre_to_mp3(file_path, genre)
                 else:
@@ -71,19 +73,18 @@ def check_mp3_genre(directory):
                     add_genre_to_mp3(file_path, genre)
 
 
-def find_specific_genre(directory):
-    novelties = []
+def find_specific_genre(directory, genre):
+    specifics = []
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
                 tag = TinyTag.get(file_path)
 
-                # print(f"Artist: {tag.artist}, Title: {tag.title}, Genre: {tag.genre}")
-                if tag.genre == 'Novelty':
+                if tag.genre == genre:
                     print(f"Artist: {tag.artist}, Title: {tag.title}, Genre: {tag.genre}")
-                    novelties.append(file_path)
-    print(novelties)
+                    specifics.append(file_path)
+    print(specifics)
 
 def list_genres(directory):
     for root, dirs, files in os.walk(directory):
@@ -98,12 +99,14 @@ def list_genres(directory):
                 print(song_string)
 
 def main():
-    directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary"
-    # directory_path = "/Users/barbarashaurette/Music/5SongsDaily/ARCHIVE"
+    directory = sys.argv[1]
 
-    # check_mp3_genre(directory_path)
-    find_specific_genre(directory_path)
-    # list_genres(directory_path)
+    check_mp3_genre(directory)
+
+    # specific_genre = sys.argv[2]
+    # find_specific_genre(directory, specific_genre)
+
+    # list_genres(directory)
 
 if __name__ == "__main__":
     main()

@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
-# python3 genre_census_revised.py
 """
-Genre census for a music library.
-Reads Artist + Genre tags (using TinyTag, or Mutagen as fallback),
-- genre_histogram.tsv         (Genre → file count)
+Simplified version of the genre census
+
+What it does:
+
+- Walks a music library and reads artist and genre tags
+- Groups file counts by genre
+- Produces a genre_histogram.tsv (genre ordered by file count)
 
 Usage:
-    pip3 install tinytag
-    python3 genre_census_revised.py
+    python3 genre_census_revised.py /path/to/music/files
 """
 
 import argparse
@@ -29,8 +30,7 @@ def walk_music(directory):
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
                 tags = TinyTag.get(file_path)
-                print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
-                print(f"Analyzing path {print_path}")
+                print(f"Analyzing path {file_path}")
 
                 total_files += 1
                 genre = tags.genre
@@ -46,11 +46,9 @@ def walk_music(directory):
     return all_counters
 
 def main():
-    directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary"
-    # directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/Alphabetical by Artist"
-    # directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/Playlists"
+    directory = sys.argv[1]
 
-    all_counters = walk_music(directory_path)
+    all_counters = walk_music(directory)
     counters = sorted(all_counters, key=lambda x: x[1], reverse=True)
 
     for c in counters:
@@ -60,7 +58,6 @@ def main():
         for c in counters:
             f.write(f"{c[0]}\t{c[1]}\n")
 
-    # print(f"[done] Scanned {total_files} files")
     print(f"[done] Wrote: genre_histogram.tsv")
 
 if __name__ == "__main__":

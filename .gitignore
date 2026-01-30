@@ -1,9 +1,10 @@
 *.tsv
-census_instructions.txt
+NOTES.txt
 discogs-api-notes.txt
-music_tree.txt
-playlist.txt
 theme-vault.txt
 
-imports.sh
+playlist_parse.py
+audio_import.py 
+rename.py
+
 music_report.sh

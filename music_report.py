@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+"""
+Usage:
+    python3 music_report.py /path/to/music/files
+"""
+
 import argparse
 import os
 from collections import Counter, defaultdict
@@ -14,8 +18,6 @@ def walk_files(root: str):
 def main():
     ap = argparse.ArgumentParser(description="Summarize a music library by category and artist.")
     ap.add_argument("root", help="Library root (e.g., /Volumes/Drive/Library)")
-    ap.add_argument("--exclude-playlists", action="store_true",
-                    help="Exclude any files under a folder literally named 'Playlists'")
     ap.add_argument("--top-artists", type=int, default=50, help="How many top artists to show (overall)")
     ap.add_argument("--top-cat-artists", type=int, default=100, help="How many category|artist rows to show")
     args = ap.parse_args()
@@ -30,10 +32,6 @@ def main():
 
     for path in walk_files(root):
         if not is_mp3(path):
-            continue
-
-        # Optional exclusion for Playlists anywhere in path
-        if args.exclude_playlists and os.sep + "Playlists" + os.sep in path:
             continue
 
         total += 1
@@ -58,19 +56,19 @@ def main():
 
     print("== Music Report ==")
     print(f"Root: {root}\n")
-    print(f"Total MP3 files{' (excluding Playlists)' if args.exclude_playlists else ' (all)'}: {total}\n")
+    print(f"Total MP3 files: {total}\n")
 
-    print("-- MP3s per Category{} --".format(" (excluding Playlists)" if args.exclude_playlists else ""))
+    print("-- MP3s per Category{} --")
     for cat, n in sorted(cat_counts.items(), key=lambda kv: kv[1], reverse=True):
         print(f"{n:7d}  {cat}")
     print()
 
-    print("-- Top Artists overall{} --".format(" (excluding Playlists)" if args.exclude_playlists else ""))
+    print("-- Top Artists overall{} --")
     for artist, n in top_artists.most_common(args.top_artists):
         print(f"{n:7d}  {artist}")
     print()
 
-    print("-- Top Artists within each Category{} --".format(" (excluding Playlists)" if args.exclude_playlists else ""))
+    print("-- Top Artists within each Category{} --")
     for key, n in sorted(cat_artist_counts.items(), key=lambda kv: kv[1], reverse=True)[:args.top_cat_artists]:
         print(f"{n:7d}  {key}")
     print()

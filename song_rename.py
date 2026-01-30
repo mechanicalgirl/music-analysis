@@ -1,15 +1,10 @@
-# /// script
-# requires-python = ">=3.13"
-# dependencies = [
-#     "pillow",
-#     "tinytag",
-# ]
-# ///
+"""
+Rename all files in a given folder using artist and title tags
 
-# uv run song_rename.py
-# https://github.com/tinytag/tinytag
+Usage:
+    python3 song_rename.py /path/to/music/files
+"""
 
-import math
 import os
 from os import listdir
 from os.path import isfile, join
@@ -17,7 +12,7 @@ import sys
 
 from tinytag import TinyTag
 
-inpath = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/Playlists/Christmas 2023/"
+inpath = sys.argv[1]
 
 mp3files = [f for f in listdir(inpath) if isfile(join(inpath, f)) and f.endswith(".mp3")]
 for mp3 in mp3files:

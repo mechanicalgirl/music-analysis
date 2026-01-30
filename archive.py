@@ -1,15 +1,26 @@
+"""
+Move music files from local folder to storage volume
+
+What it does:
+
+- Identifies where a music file should be stored based on artist + genre tags
+- Creates the storage path if it doesn't exist
+- Asks for verification before moving the file
+
+Usage:
+    python3 archive.py "/path/to/music/files" "/path/to/storage/volume"
+"""
+
 import os
 import shutil
 import sys
 
 from tinytag import TinyTag
 
-def identify():
+def identify(source_directory, target_directory):
     ignore_genres = ['Soundtrack', 'Disney', 'Christmas', 'Jazz', 'Blues']
-    archive_directory = "/Users/barbarashaurette/Music/5SongsDaily/ARCHIVE"
-    volume_directory = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary"
 
-    for root, dirs, files in os.walk(archive_directory):
+    for root, dirs, files in os.walk(source_directory):
         for file in files:
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
@@ -31,7 +42,7 @@ def identify():
                     else:
                         new_root = tag.genre
 
-                new_path = os.path.join(volume_directory, new_root, artist_folder, file)
+                new_path = os.path.join(target_directory, new_root, artist_folder, file)
 
                 move = input(f"Move to {new_path}? (y/n): ")
                 if move == 'y':
@@ -64,8 +75,9 @@ def file_move(old_path, new_path):
                 print(e)
 
 def main():
-    identify()
-    ## TODO: add separate condition for jpg files
+    source_directory = sys.argv[1]
+    target_directory = sys.argv[2]
+    identify(source_directory, target_directory)
 
 if __name__ == "__main__":
     main()

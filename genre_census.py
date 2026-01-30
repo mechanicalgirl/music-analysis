@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-# python3 genre_census.py "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary" --ext mp3 --with-buckets --guess-artist-from-path
 """
-Genre census for a music library.
-Reads Artist + Genre tags (using TinyTag, or Mutagen as fallback),
-normalizes common genre names, and produces TSV reports:
+Genre census for a music library
 
-- artists_majority_genre.tsv  (Artist → majority genre across their files)
-- genre_histogram.tsv         (Genre → file count)
-- bucket_histogram.tsv        (optional macro buckets → count of files)
+What it does:
+
+- Walks your music library and reads Artist + Genre tags.
+- Normalizes common genre variants (e.g., *alt rock* → *alternative rock*, *hip hop* → *hip-hop*).
+- Produces these reports:
+  - artists_majority_genre.tsv  (Artist -> majority genre across files)
+  - genre_histogram.tsv         (Genre -> file count)
+  - bucket_histogram.tsv        (optional macro buckets -> count of files)
 
 Usage:
-    pip3 install tinytag   # or: pip3 install mutagen
-    python3 genre_census.py "/path/to/MusicLibrary/Alphabetical by Artist" \
-        --ext mp3 --with-buckets --guess-artist-from-path
+    python3 genre_census.py "/path/to/music/files" --ext mp3 --withbuckets
 """
 
 import argparse
@@ -165,7 +165,6 @@ def bucket_for(genre: str) -> str:
         return "pop"
     return "other"
 
-
 def walk_music(root, exts):
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames]
@@ -175,13 +174,11 @@ def walk_music(root, exts):
                 continue
             yield os.path.join(dirpath, fn)
 
-
 def main():
     ap = argparse.ArgumentParser(description="Census genres in a music library (uses TinyTag or Mutagen).")
-    ap.add_argument("root", help="Root folder (e.g., /Volumes/Drive/MusicLibrary/Alphabetical by Artist)")
+    ap.add_argument("root", help="Root folder (e.g., /path/to/music/files)")
     ap.add_argument("--ext", action="append", default=["mp3"], help="File extensions to include (default: mp3).")
-    ap.add_argument("--with-buckets", action="store_true", help="Also emit macro bucket histogram.")
-    ap.add_argument("--guess-artist-from-path", action="store_true", help="If Artist tag empty, fallback to parent folder name.")
+    ap.add_argument("--withbuckets", action="store_true", help="Also emit macro bucket histogram.")
     args = ap.parse_args()
 
     tag_lib, reader = try_import_tag_readers()
@@ -198,9 +195,9 @@ def main():
         print(f"Analyzing path {path}")
         total_files += 1
         artist, genre = reader(path)
-        if not artist and args.guess_artist_from_path:
+        if not artist: # guess artist based on path
             artist = os.path.basename(os.path.dirname(path)).strip()
-        # norm_genre = normalize_genre(genre)
+        norm_genre = normalize_genre(genre)
         key_genre = genre if genre else "Unknown"
         genre_counter[key_genre] += 1
         if artist:
@@ -219,7 +216,7 @@ def main():
         for g, c in sorted(genre_counter.items(), key=lambda kv: kv[1], reverse=True):
             f.write(f"{g}\t{c}\n")
 
-    if args.with_buckets:
+    if args.withbuckets:
         bucket_counts = Counter()
         for g, c in genre_counter.items():
             bucket_counts[bucket_for(g)] += c
@@ -228,7 +225,7 @@ def main():
                 f.write(f"{b}\t{c}\n")
 
     print(f"[done] Scanned {total_files} files")
-    print(f"[done] Wrote: artists_majority_genre.tsv, genre_histogram.tsv" + (", bucket_histogram.tsv" if args.with_buckets else ""))
+    print(f"[done] Wrote: artists_majority_genre.tsv, genre_histogram.tsv" + (", bucket_histogram.tsv" if args.withbuckets else ""))
 
 
 if __name__ == "__main__":

@@ -155,7 +155,6 @@ def main():
 
     base: Path = args.base.expanduser().resolve()
     backup = {}
-    # folder-level artist apply cache
     folder_artist_cache = {}
 
     for path in sorted(base.rglob('*')):
@@ -163,7 +162,6 @@ def main():
             continue
 
         current_tags = read_tags(path)
-        # suggested artist: first check tags, else path
         suggested_artist = current_tags.get('artist') or current_tags.get('ARTIST') or parse_artist_from_path(path, base)
         suggested_title = current_tags.get('title') or current_tags.get('TITLE') or parse_title_from_filename(path.name)
 

@@ -1,3 +1,10 @@
+"""
+Find mp3 files that are missing a genre tag
+
+Usage:
+    python3 no_genre.py /path/to/music/files
+"""
+
 import os
 from tinytag import TinyTag
 
@@ -14,5 +21,10 @@ def find_mp3_without_genre(directory):
                 if tag.genre is None:
                     print(file_path)
 
-find_mp3_without_genre("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/Alphabetical by Artist")
+def main():
+    directory = sys.argv[1]
+    find_mp3_without_genre(directory)
+
+if __name__ == "__main__":
+    main()
 

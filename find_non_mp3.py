@@ -1,3 +1,11 @@
+"""
+Identify any files in the music library that are not MP3s
+
+Usage:
+    python3 find_non_mp3.py /path/to/music/files
+
+"""
+
 import os
 import sys
 
@@ -7,17 +15,13 @@ def find_non_mp3(directory):
         for file in files:
             if not file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
-                print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
-                if file == '.DS_Store' or file.endswith('.zip') or file.endswith('.jpg') or file.endswith('.pdf') or file.endswith('.png') or file.endswith('.txt'):
-                    pass
-                else:
-                    print(file_path)
-                    allnon.append(print_path)
-    # print(allnon)
+                print(file_path)
+                allnon.append(file_path)
+    return allnon
 
 def main():
-    directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary"
-    find_non_mp3(directory_path)
+    directory = sys.argv[1]
+    non = find_non_mp3(directory)
 
 if __name__ == "__main__":
     main()

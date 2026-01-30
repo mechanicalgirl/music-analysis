@@ -1,3 +1,17 @@
+"""
+Identify duplicate music files based on artist, title and file length
+
+What it does:
+
+- Iterates over a collection of music files
+- Identifies duplicate files
+- Stores the list of duplicates in a local file
+- Iterates over the list of duplicates and gives the user the option to delete one or the other
+
+Usage:
+    python3 find_duplicates.py /path/to/music/files
+"""
+
 import os
 import hashlib
 import sys
@@ -8,10 +22,6 @@ from tinytag import TinyTag
 
 
 def get_file_hash(file_tuple):
-    # hash_md5 = hashlib.md5()
-    # with open(file_path, "rb") as f:
-    #     for chunk in iter(lambda: f.read(4096), b""):
-    #         hash_md5.update(chunk)
     hash_md5 = hashlib.md5(file_tuple)
     print(hash_md5.hexdigest())
     return hash_md5.hexdigest()
@@ -28,7 +38,6 @@ def find_duplicate_files(directory):
                 audio = MP3(file_path, ID3=ID3)
                 print(f"Artist: {tag.artist}, Title: {tag.title}, Length: {int(audio.info.length)}")
 
-                # file_hash = get_file_hash(file_path)
                 file_tuple = (tag.artist, tag.title, int(audio.info.length))
                 file_hash = get_file_hash(str(file_tuple).encode())
 
@@ -38,14 +47,13 @@ def find_duplicate_files(directory):
                     file_hash_dict[file_hash] = file_path
     return duplicate_files
 
-def fix_duplicates():
+def fix_duplicates(directory, duplicates):
     deletes = []
-    base_dir = '/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/'
-    with open('duplicates.txt', 'r') as file:
-        for line in file:
+    if duplicates:
+        for line in duplicates:
             ft = eval(line.strip())
-            file_1 = base_dir+ft[0]
-            file_2 = base_dir+ft[1]
+            file_1 = directory + ft[0]
+            file_2 = directory + ft[1]
             try:
                 audio_1 = MP3(file_1, ID3=ID3)
                 audio_2 = MP3(file_2, ID3=ID3)
@@ -67,7 +75,7 @@ def fix_duplicates():
                 pass
 
 def main():
-    directory = '/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary'
+    directory = sys.argv[1]
     duplicates = find_duplicate_files(directory)
     if duplicates:
         print("Duplicate files found:")
@@ -75,9 +83,7 @@ def main():
             print(f"File 1: {file1}")
             print(f"File 2: {file2}")
             print("-" * 30)
-
-    # fix_duplicates()
-
+    fix_duplicates(directory, duplicates)
 
 if __name__ == "__main__":
     main()

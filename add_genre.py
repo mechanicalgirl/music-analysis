@@ -16,8 +16,7 @@ def add_artist_to_mp3(file_path, artist):
         # Set the artist
         audio.tags.add(TPE1(encoding=3, text=artist))
         audio.save()
-        print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
-        print(f'Added artist "{artist}" to {print_path}')
+        print(f'Added artist "{artist}" to {file_path}')
     except ID3NoHeaderError:
         print(f'No ID3 header found in {file_path}.')
     except Exception as e:
@@ -33,33 +32,30 @@ def add_genre_to_mp3(file_path, genre):
         # Set the genre
         audio.tags.add(TCON(encoding=3, text=genre))
         audio.save()
-        print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
-        print(f'Added genre "{genre}" to {print_path}')
+        print(f'Added genre "{genre}" to {file_path}')
     except ID3NoHeaderError:
         print(f'No ID3 header found in {file_path}.')
     except Exception as e:
         print(f'Error processing {file_path}: {e}')
 
-def find_mp3_without_genre_and_add(directory):
+def find_mp3_without_genre_or_artist(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(root, file)
-                print_path = file_path.replace("/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary", "")
                 tag = TinyTag.get(file_path)
 
-                print(f"{print_path}, Tag: {tag.genre}, Artist: {tag.artist}")
+                print(f"{file_path}, Tag: {tag.genre}, Artist: {tag.artist}")
                 if not tag.artist:
-                    artist = input(f"Enter the artist for {print_path}: ")
+                    artist = input(f"Enter the artist for {file_path}: ")
                     print(f"Artist is {artist}")
                     add_artist_to_mp3(file_path, artist)
                 else:
                     artist = tag.artist
 
-                # if tag.genre is None or tag.genre == '' or tag.genre == ' ' or tag.genre.lower() in ['other', 'metalcore', 'unknown']:
-                if tag.genre == artist:
+                if tag.genre is None or tag.genre == '' or tag.genre == ' ' or tag.genre.lower() in ['other', 'unknown']:
                     genre = ""
-                    """
+                    # Search by artist to get genre
                     try:
                         artist = artist.replace(" ", "%20")
                     except Exception as e:
@@ -71,22 +67,15 @@ def find_mp3_without_genre_and_add(directory):
                         if result['artists'][0]['strGenre']:
                             genre = result['artists'][0]['strGenre']
                         else:
-                            genre = input(f"Enter the genre for {print_path}: ")
+                            genre = input(f"Enter the genre for {file_path}: ")
                     else:
-                        genre = input(f"Enter the genre for {print_path}: ")
-                    """
-                    genre = input(f"Enter the genre for {print_path}: ")
+                        genre = input(f"Enter the genre for {file_path}: ")
                     print(f"Genre is {genre}")
                     add_genre_to_mp3(file_path, genre)
 
 def main():
-    directory_path = "/Volumes/My Passport for Mac/bshaurette.music.collection/MusicLibrary/Playlists"
-    # directory_path = "/Users/barbarashaurette/Music/5SongsDaily/ARCHIVE"
-    find_mp3_without_genre_and_add(directory_path)
-    ## Check for Soundtrack and move
-    ## Check for Ambient and move
-    ## TODO: convert lower case to title case
-    ## TODO: find genres with only 1 instance?
+    directory_path = sys.argv[1]  # (example: "/path/to/music/files")
+    find_mp3_without_genre_or_artist(directory_path)
 
 if __name__ == "__main__":
     main()
