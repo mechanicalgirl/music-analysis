@@ -44,6 +44,7 @@ def identify(source_directory, target_directory):
 
                 new_path = os.path.join(target_directory, new_root, artist_folder, file)
 
+                print('\n', file_path)
                 move = input(f"Move to {new_path}? (y/n): ")
                 if move == 'y':
                     file_move(file_path, new_path)
@@ -68,8 +69,8 @@ def file_move(old_path, new_path):
     except Exception as e:
         if 'No such file or directory' in str(e):
             print(f"\tCreate directory: {new_path.rsplit('/', 1)[0]}")
-            os.mkdir(new_path.rsplit('/', 1)[0])
             try:
+                os.mkdir(new_path.rsplit('/', 1)[0])
                 shutil.move(old_path, new_path)
             except Exception as e:
                 print(e)
