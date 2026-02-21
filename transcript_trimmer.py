@@ -35,23 +35,29 @@ for segment in result['segments']:
 
 segment_ids_to_remove = []
 response = input("List segment ids to remove (e.g. 35-118, 200, 235, 281-299): ")
+if response == 'exit':
+    sys.exit()
 for r in response.split(', '):
     rspl = r.split('-')
     if len(rspl) > 1:
-        segment_ids_to_remove.extend(list(range(int(rspl[0]), int(rspl[1]))))
+        segment_ids_to_remove.extend(list(range(int(rspl[0]), int(rspl[1])+1)))
     else:
         segment_ids_to_remove.append(int(rspl[0]))
 print(f"Removing segments {segment_ids_to_remove}")
 
-remove_segments = []
+x_segments = []
 for s in segment_ids_to_remove:
-    remove_segments.append([(d['start'] * 1000, d['end'] * 1000) for d in all_segments if d.get('id') == s][0])
+    x_segments.append([(d['start'] * 1000, d['end'] * 1000) for d in all_segments if d.get('id') == s][0])
 
 # Remove segments (reverse order so times don't shift)
 audio = AudioSegment.from_mp3(podcast_path)
-for start_ms, end_ms in reversed(remove_segments):
+for start_ms, end_ms in reversed(x_segments):
     audio = audio[:start_ms] + audio[end_ms:]
 audio.export(new_podcast_path, format="mp3")
 
-# uv run transcript_trimmer.py yourfile.mp3
+new_result = model.transcribe(new_podcast_path)
+for segment in new_result['segments']:
+    print(segment['text'])
+
+# uv run transcript_trimmer.py TheMoth.mp3
 
